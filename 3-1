@@ -1,0 +1,225 @@
+import java.io.*;
+import java.util.*;
+
+// Classe Pessoa
+class Pessoa implements Serializable {
+    private int id;
+    private String nome;
+
+    public Pessoa() {}
+
+    public Pessoa(int id, String nome) {
+        this.id = id;
+        this.nome = nome;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public void exibir() {
+        System.out.println("ID: " + id);
+        System.out.println("Nome: " + nome);
+    }
+}
+
+// Classe PessoaFisica
+class PessoaFisica extends Pessoa {
+    private String cpf;
+    private int idade;
+
+    public PessoaFisica() {}
+
+    public PessoaFisica(int id, String nome, String cpf, int idade) {
+        super(id, nome);
+        this.cpf = cpf;
+        this.idade = idade;
+    }
+
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
+
+    public int getIdade() { return idade; }
+    public void setIdade(int idade) { this.idade = idade; }
+
+    @Override
+    public void exibir() {
+        super.exibir();
+        System.out.println("CPF: " + cpf);
+        System.out.println("Idade: " + idade);
+    }
+}
+
+// Classe PessoaJuridica
+class PessoaJuridica extends Pessoa {
+    private String cnpj;
+
+    public PessoaJuridica() {}
+
+    public PessoaJuridica(int id, String nome, String cnpj) {
+        super(id, nome);
+        this.cnpj = cnpj;
+    }
+
+    public String getCnpj() { return cnpj; }
+    public void setCnpj(String cnpj) { this.cnpj = cnpj; }
+
+    @Override
+    public void exibir() {
+        super.exibir();
+        System.out.println("CNPJ: " + cnpj);
+    }
+}
+
+// Gerenciador de Pessoas Físicas
+class PessoaFisicaRepo {
+    private ArrayList<PessoaFisica> pessoasFisicas = new ArrayList<>();
+
+    public void inserir(PessoaFisica pessoa) {
+        pessoasFisicas.add(pessoa);
+    }
+
+    public void alterar(PessoaFisica pessoa) {
+        for (int i = 0; i < pessoasFisicas.size(); i++) {
+            if (pessoasFisicas.get(i).getId() == pessoa.getId()) {
+                pessoasFisicas.set(i, pessoa);
+                break;
+            }
+        }
+    }
+
+    public void excluir(int id) {
+        for (int i = 0; i < pessoasFisicas.size(); i++) {
+            if (pessoasFisicas.get(i).getId() == id) {
+                pessoasFisicas.remove(i);
+                break;
+            }
+        }
+    }
+
+    public PessoaFisica obter(int id) {
+        for (PessoaFisica pessoa : pessoasFisicas) {
+            if (pessoa.getId() == id) {
+                return pessoa;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<PessoaFisica> obterTodos() {
+        return pessoasFisicas;
+    }
+
+    public void persistir(String nomeArquivo) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
+            out.writeObject(pessoasFisicas);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void recuperar(String nomeArquivo) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
+            pessoasFisicas = (ArrayList<PessoaFisica>) in.readObject();
+        }
+    }
+}
+
+// Gerenciador de Pessoas Jurídicas
+class PessoaJuridicaRepo {
+    private ArrayList<PessoaJuridica> pessoasJuridicas = new ArrayList<>();
+
+    public void inserir(PessoaJuridica pessoa) {
+        pessoasJuridicas.add(pessoa);
+    }
+
+    public void alterar(PessoaJuridica pessoa) {
+        for (int i = 0; i < pessoasJuridicas.size(); i++) {
+            if (pessoasJuridicas.get(i).getId() == pessoa.getId()) {
+                pessoasJuridicas.set(i, pessoa);
+                break;
+            }
+        }
+    }
+
+    public void excluir(int id) {
+        for (int i = 0; i < pessoasJuridicas.size(); i++) {
+            if (pessoasJuridicas.get(i).getId() == id) {
+                pessoasJuridicas.remove(i);
+                break;
+            }
+        }
+    }
+
+    public PessoaJuridica obter(int id) {
+        for (PessoaJuridica pessoa : pessoasJuridicas) {
+            if (pessoa.getId() == id) {
+                return pessoa;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<PessoaJuridica> obterTodos() {
+        return pessoasJuridicas;
+    }
+
+    public void persistir(String nomeArquivo) throws IOException {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(nomeArquivo))) {
+            out.writeObject(pessoasJuridicas);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void recuperar(String nomeArquivo) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(nomeArquivo))) {
+            pessoasJuridicas = (ArrayList<PessoaJuridica>) in.readObject();
+        }
+    }
+}
+
+// Classe Principal
+public class CadastroPOO {
+    public static void main(String[] args) {
+        PessoaFisicaRepo repo1 = new PessoaFisicaRepo();
+        PessoaFisica pf1 = new PessoaFisica(1, "João", "123.456.789-00", 30);
+        PessoaFisica pf2 = new PessoaFisica(2, "Maria", "987.654.321-00", 25);
+        repo1.inserir(pf1);
+        repo1.inserir(pf2);
+
+        try {
+            repo1.persistir("pessoasFisicas.dat");
+
+            PessoaFisicaRepo repo2 = new PessoaFisicaRepo();
+            repo2.recuperar("pessoasFisicas.dat");
+
+            System.out.println("Pessoas Físicas:");
+            for (PessoaFisica pessoa : repo2.obterTodos()) {
+                pessoa.exibir();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        PessoaJuridicaRepo repo3 = new PessoaJuridicaRepo();
+        PessoaJuridica pj1 = new PessoaJuridica(1, "Empresa A", "12345678901234");
+        PessoaJuridica pj2 = new PessoaJuridica(2, "Empresa B", "98765432109876");
+        repo3.inserir(pj1);
+        repo3.inserir(pj2);
+
+        try {
+            repo3.persistir("pessoasJuridicas.dat");
+
+            PessoaJuridicaRepo repo4 = new PessoaJuridicaRepo();
+            repo4.recuperar("pessoasJuridicas.dat");
+
+            System.out.println("\nPessoas Jurídicas:");
+            for (PessoaJuridica pessoa : repo4.obterTodos()) {
+                pessoa.exibir();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
